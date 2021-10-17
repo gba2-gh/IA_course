@@ -15,17 +15,20 @@ punt =zeros(1,total_agentes); %Puntuacion para total de agentes
 %acciones=zeros(total_agentes,244);
 acciones= round(0 + (6-0).*rand(total_agentes,244));
 
+% acciones=zeros(20,244);
+% acciones = acciones + 4;
+
 %%Para los k agentes
 for k=1: total_agentes 
 %%Iterar en 10 ambientes distintos    
-for v=0:10 
+for v=1:10 
     plane=crearAmbiente();
     %%Iniciar Agente en posición aleatoria
     a=2;
     b=11;
     agente_x  = round(a + (b-a).*rand());%x
     agente_y = round(a + (b-a).*rand());%y
-for d=0: total_des %%1000 decisiones
+for d=1: total_des %%1000 decisiones
     %%Genotipo
     %N S E O C
     genotipo = zeros(1,5);
@@ -116,19 +119,33 @@ for d=0: total_des %%1000 decisiones
         case 4 %Levantar marca
             if genotipo(5) == 1
                 punt(k) = punt(k) + 10;
-                plane(agente_x, agente_y) = 0;   
+                plane(agente_y, agente_x) = 0;   
             else
                 punt(k) = punt(k) -3;
             end
         case 5
             %nada
     end
-    punt
+    %punt
     %plane(agente_y, agente_x) = 3     
 end
 end
 end
-
+punt
 %%TODO
 %%%%SLECCION CON PUNT Y ACCIONES
+
+%Fitness value
+%Normalizar cada valor entre 0 y 1
+max=500;
+min=-30000;
+punt_norm = (punt - min) .* (1/(max-min));
+
+%Normalizar rango 0 a 1
+punt_norm2 = punt_norm .* (1/sum(punt_norm));
+
+punt_norm2Sum = movsum(punt_norm2,[20 0])
+
+%%TODO aleatorio comparar con punt_norm2Sum
+p = rand();
 
