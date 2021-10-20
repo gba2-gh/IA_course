@@ -1,4 +1,4 @@
-function plane = crearAmbiente();
+function plane = crearAmbiente(total_marcas);
 
 %Definir plano de 10x10
 %0. Vacía
@@ -14,12 +14,13 @@ plane(:,1)=2;
 plane(:,end)=2;
 
 %marcas
+%total_marcas=50;
 a=2;
 b=11;
-marcas(1,:)= round(a + (b-a).*rand(1,5));%x
-marcas(2,:)= round(a + (b-a).*rand(1,5));%y
+marcas(1,:)= round(a + (b-a).*rand(1,total_marcas));%x
+marcas(2,:)= round(a + (b-a).*rand(1,total_marcas));%y
 
-for i=1:5
+for i=1:total_marcas
     x=marcas(1,i);
     y=marcas(2,i);
     %Duplicados
