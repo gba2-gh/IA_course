@@ -1,10 +1,10 @@
 caSize=31;
-evoTotal=15;
-rule=222;
+evoTotal=20;
+
 agente= zeros(evoTotal,caSize);
 
 agente(1,ceil(caSize/2))=1
-rule =dec2bin(rule);
+rule =dec2bin(30);
 
 for evo=1:evoTotal-1
 %Código del agente actual
@@ -40,7 +40,7 @@ end
 end
 
 [sy, sx] = size(agente);
-%[x, y] = find(agente);
+[x, y] = find(agente);
 for i=1:sy
     for j=1:sx
         if agente(i,j) ==1
