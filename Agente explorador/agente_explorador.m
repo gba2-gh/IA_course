@@ -8,25 +8,39 @@ clear
 clc
 close all
 
-total_marcas=50;
+%ambiente
+total_marcas=5;
+print_plane=false;
+
+%Iteraciones
+total_etapas = 500; %%Total de generaciones
 total_des = 1000; %Decisines totales por ambiente
 total_ambientes=10; %Ambientes aleatorios a explorar
-total_agentes = 0; %total de Agentes
-%punt =zeros(1,total_agentes); %Puntuacion para total de agentes
-%Decisiones aleatorias para el total de agentes agentes
-%acciones=zeros(total_agentes,244);
-acciones= round(0 + (6-0).*rand(total_agentes,244));
-%cantidad de mutaciones
-mut_amount = floor(0.01 * 244);
-% acciones=zeros(20,244);
-% acciones = acciones + 4;
+total_agentes = 20; %total de Agentes
+
+%cantidad de mutacion
+mut_per=0.01;
+mut_amount = floor(mut_per * 243);
+
+%Puntuación
+score_marcaT= 10;
+score_marcaF= -3;
+score_salir = -1;
+
 %NORM
-maxV=500;
-minV=-30000;
+%maxV=500;
+maxV= total_marcas * score_marcaT ;
+minV= score_marcaF * total_des ;
 
 
 
-for etapa=1:1000
+%Decisiones aleatorias para el total de agentes agentes
+acciones= round(0 + (6-0).*rand(total_agentes,243));
+%acciones=zeros(total_agentes,243);
+% acciones = acciones + 4;
+
+
+for etapa=1:total_etapas
 punt =zeros(1,total_agentes); 
 
 %%Para los k agentes
@@ -70,20 +84,20 @@ for d=1: total_des %%1000 decisiones
     end
 
     %Decisión
+    accion = acciones(k,dec+1);
     
-    
+    if print_plane == true
     %%%%IMPRESION
     %fprintf('#############AGENTE %d ##############', k)
     %fprintf('#############ITERACION %d ##############', d)
-    %plane
-
+    plane
     %agente_x
     %agente_y
     %genotipo
     %dec
-    accion = acciones(k,dec+1);
-    %punt
-
+    accion
+    punt
+    end
     
     
     %%Ejecutar accion
@@ -105,35 +119,35 @@ for d=1: total_des %%1000 decisiones
     
     switch accion
         case 0 %Mover arriba
-            if genotipo(1) ~= 2 %%%Distinto de
+            if genotipo(1) ~= 2 %%%Distinto de 2
                 agente_y = agente_y-1;
-            else
-                punt(k) = punt(k) -1;
+            else%%intenta salir
+                punt(k) = punt(k) + score_salir;
             end
         case 1 %Mover abajo
             if genotipo(2) ~= 2
                 agente_y = agente_y+1;
             else
-                punt(k) = punt(k) -1;
+                punt(k) = punt(k) + score_salir;
             end
         case 2 %Mover derecha
             if genotipo(3) ~= 2
                 agente_x = agente_x +1;
              else
-                punt(k) = punt(k) -1;
+                punt(k) = punt(k) + score_salir;
             end
         case 3 %Mover izquierda
             if genotipo(4) ~= 2
                 agente_x = agente_x -1;
             else
-                punt(k) = punt(k) -1;
+                punt(k) = punt(k) + score_salir;
             end
         case 4 %Levantar marca
             if genotipo(5) == 1
-                punt(k) = punt(k) + 10;
+                punt(k) = punt(k) + score_marcaT;
                 plane(agente_y, agente_x) = 0;   
             else
-                punt(k) = punt(k) -3;
+                punt(k) = punt(k) + score_marcaF;
             end
         case 5
             %nada
@@ -144,19 +158,28 @@ end
 end
 end
 %punt;
-%%TODO
-%%%%SLECCION CON PUNT Y ACCIONES
 
+%%%%SELECCION 
 %Fitness value
 %Normalizar cada valor entre 0 y 1
-%maxV=500;%total_marcas*total_ambientes;
-%minV=-30000;
-punt_norm = (punt - minV) .* (1/(maxV-minV));
+punt_prom = punt .* (1/total_ambientes);
+
+maxV=max(punt_prom);
+minV=min(punt_prom);
+
+%punt_norm = (punt - minV) .* (1/(maxV-minV));
+punt_normP = (punt_prom -minV) .* (1/(maxV-minV));
 
 %Normalizar rango 0 a 1
-punt_norm2 = punt_norm .* (1/sum(punt_norm));
+%punt_norm2 = punt_norm .* (1/sum(punt_norm));
+punt_norm2P = punt_normP .* (1/sum(punt_normP));
 
-punt_norm2Sum = movsum(punt_norm2,[20 0]);
+
+
+%punt_norm2Sum = movsum(punt_norm2,[total_agentes 0]); %%%TODO
+
+punt_norm2Sum = movsum(punt_norm2P,[total_agentes 0]);  %%%Cambio
+
 
 %%TODO aleatorio comparar con punt_norm2Sum
 for k=1:size(punt,2)
@@ -184,6 +207,7 @@ for k=1:size(punt,2)
     acciones_new(k,:)= acciones(idx(k),:)  ;
 end
 idx;
+
 %% Cruzamiento
 %1 punto
 k=1;
@@ -201,7 +225,7 @@ while size(temp,1) > 0
     temp(padre_idx,:) = [];
     
     
-    cross_point= round(1 + (244-1).*rand());%x
+    cross_point= round(1 + (243-1).*rand());%x
     
     hijo1 = padre1(1,[1:cross_point-1]) ;
     hijo1 = cat(2, hijo1, padre2(1,[cross_point:end]));    
@@ -210,8 +234,8 @@ while size(temp,1) > 0
     
   
     %%%Mutacion
-    mut_points1= round(a + (b-a).*rand(1,mut_amount));%
-    mut_points2= round(a + (b-a).*rand(1,mut_amount));
+    mut_points1= round(1 + (243-1).*rand(1,mut_amount));%
+    mut_points2= round(1 + (243-1).*rand(1,mut_amount));
     for i=1:size(mut_points1,2)
         alelo_new=round(0 + (6-0).*rand());
         hijo1(mut_points1(1,i))= alelo_new;
@@ -228,17 +252,20 @@ while size(temp,1) > 0
 end
  
 acciones = hijos;
-
 punt_max(etapa)= max(punt);
+punt_maxP(etapa)= max(punt_prom);
 end
 punt
 
 figure
 plot(punt_max)
 grid on
-title('pun_max' )
+title('punt max' )
 
-
+figure
+plot(punt_maxP)
+grid on
+title('punt max P' )
 
 
 return;
