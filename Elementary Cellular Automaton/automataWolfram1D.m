@@ -1,7 +1,8 @@
+clear all
+clc all
+
 caSize=31;
 evoTotal=15;
-
-
 
 for z=1:1:30
     agente= zeros(evoTotal,caSize);
