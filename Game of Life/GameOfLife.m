@@ -21,7 +21,7 @@ end
 
 
 % Generate random life cells
-total= floor(numel(cells)*0.08);
+total= floor(numel(cells)*0.1);
 idx = randsample(numel(cells),total);
 cells(idx) = 1;
 
@@ -69,7 +69,7 @@ for i=2:gridSize-1
                 newCells(j,i)=1;
             end
         else %If the cell is dead, then it springs to life only in the case that it has 3 live neighbors
-            if vecinos>=3
+            if vecinos==3
                 newCells(j,i)=1;
             end
             
@@ -87,6 +87,7 @@ if mostrar ==1
     imagesc(newCells); caxis([0 1]);
     colormap default; 
     axis off; axis equal; drawnow
+    title(['Game of life it=', num2str(k)])
 else
     for i=2:gridSize-1
         for j=2:gridSize-1
@@ -100,7 +101,7 @@ else
     end
 end
 
-title(['Game of life it=', num2str(k)])
+
 cells = newCells;
 pause(delay)
 end
