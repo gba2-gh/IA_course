@@ -1,11 +1,23 @@
 caSize=31;
 evoTotal=15;
-rule=222;
-agente= zeros(evoTotal,caSize);
 
-agente(1,ceil(caSize/2))=1
-rule =dec2bin(rule);
 
+
+for z=1:1:30
+    agente= zeros(evoTotal,caSize);
+    agente(1,ceil(caSize/2))=1
+    ruled=59+z;
+    rule =dec2bin(ruled);
+    
+    %%%Grid
+    [sy, sx] = size(agente);
+   
+    for i=1:sy
+        for j=1:sx
+            rectangle('Position', [j,evoTotal-i, 1, 1], 'facecolor', 'white' );
+        end
+    end
+    title(['Regla: ', num2str(ruled)])
 for evo=1:evoTotal-1
 %Código del agente actual
 code=zeros(1,caSize);
@@ -39,15 +51,19 @@ for i=1:caSize
 end
 end
 
-[sy, sx] = size(agente);
-%[x, y] = find(agente);
+%%Dibujar
 for i=1:sy
     for j=1:sx
         if agente(i,j) ==1
             rectangle('Position', [j,evoTotal-i, 1, 1], 'facecolor', 'black');
+            pause(0.1)
         end
 
     end
 end
+pause(1)
+%clf reset
+pause(1)
 
+end
 

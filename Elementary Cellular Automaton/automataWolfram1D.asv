@@ -1,11 +1,19 @@
 caSize=31;
-evoTotal=20;
+evoTotal=15;
 
-agente= zeros(evoTotal,caSize);
+[sy, sx] = size(agente);
+%[x, y] = find(agente);
+for i=1:sy
+    for j=1:sx
+        rectangle('Position', [j,evoTotal-i, 1, 1], 'facecolor', 'white');
+    end
+end
 
-agente(1,ceil(caSize/2))=1
-rule =dec2bin(30);
-
+for z=1:1:30
+    agente= zeros(evoTotal,caSize);
+    agente(1,ceil(caSize/2))=1
+    ruled=30+z;
+    rule =dec2bin(ruled);
 for evo=1:evoTotal-1
 %Código del agente actual
 code=zeros(1,caSize);
@@ -40,14 +48,19 @@ end
 end
 
 [sy, sx] = size(agente);
-[x, y] = find(agente);
+%[x, y] = find(agente);
 for i=1:sy
     for j=1:sx
         if agente(i,j) ==1
             rectangle('Position', [j,evoTotal-i, 1, 1], 'facecolor', 'black');
+            pause(0.1)
         end
 
     end
 end
+pause(1)
+clf reset
+pause(1)
 
+end
 
