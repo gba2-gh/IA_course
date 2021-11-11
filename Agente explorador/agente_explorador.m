@@ -15,26 +15,27 @@ print_plane=false;
 %Iteraciones
 total_etapas = 500; %%Total de generaciones
 total_des = 1000; %Decisines totales por ambiente
-total_ambientes=10; %Ambientes aleatorios a explorar
+total_ambientes= 10; %Ambientes aleatorios a explorar
 total_agentes = 20; %total de Agentes
 
 %cantidad de mutacion
-mut_per=0.01;
+mut_per=0.04;
 mut_amount = floor(mut_per * 243);
 
 %Puntuación
 score_marcaT= 10;
 score_marcaF= -3;
 score_salir = -1;
-
+scores=[score_marcaT score_marcaF score_salir];
 %NORM
 %maxV=500;
 maxV= total_marcas * score_marcaT ;
-minV= score_marcaF * total_des ;
+minV= min(score_marcaF * total_des, score_salir * total_des) ;
 
 
-
-%Decisiones aleatorias para el total de agentes agentes
+punt_best=0;
+accion_best=zeros(1,243);
+%Decisiones aleatorias para el total de agentes
 acciones= round(0 + (6-0).*rand(total_agentes,243));
 %acciones=zeros(total_agentes,243);
 % acciones = acciones + 4;
@@ -46,7 +47,8 @@ punt =zeros(1,total_agentes);
 %%Para los k agentes
 for k=1: total_agentes 
 %%Iterar en 10 ambientes distintos    
-for v=1:total_ambientes 
+for v=1:total_ambientes
+    %%%Crear nurvo ambiente
     plane=crearAmbiente(total_marcas);
     
     %%Iniciar Agente en posición aleatoria
@@ -54,107 +56,126 @@ for v=1:total_ambientes
     b=11;
     agente_x  = round(a + (b-a).*rand());%x
     agente_y = round(a + (b-a).*rand());%y
-for d=1: total_des %%1000 decisiones
-    %%Genotipo
-    %N S E O C
-    genotipo = zeros(1,5);
-    %N
-    genotipo(1) = plane(agente_y - 1, agente_x);
-    %plane(agente_y - 1, agente_x) = 33;
-    %S
-    genotipo(2) = plane(agente_y + 1, agente_x);
-    %plane(agente_y+1, agente_x) = 34;
-    %E
-    genotipo(3) = plane(agente_y, agente_x +1);
-    %plane(agente_y, agente_x +1) = 35;
-    %0
-    genotipo(4) = plane(agente_y, agente_x-1);
-    %plane(agente_y, agente_x -1) = 36;
-    %C
-    genotipo(5) = plane(agente_y, agente_x);
-    plane(agente_y, agente_x) = 555;
-
-    %%Fenotipo
-    % Ternario a decimal
-    dec=0;
-    j=4;
-    for i=1:5
-        dec = dec + (3^(j)) * genotipo(i);
-        j=j-1;
-    end
-
-    %Decisión
-    accion = acciones(k,dec+1);
     
-    if print_plane == true
-    %%%%IMPRESION
-    %fprintf('#############AGENTE %d ##############', k)
-    %fprintf('#############ITERACION %d ##############', d)
-    plane
-    %agente_x
-    %agente_y
-    %genotipo
-    %dec
-    accion
-    punt
-    end
-    
-    
-    %%Ejecutar accion
-    plane(agente_y, agente_x) = genotipo(5);
-    
-    %caso aleatorio
-    if accion == 6
-        p = rand();
-        if 0.0 <= p && p < 0.25
-            accion = 0;
-         elseif 0.25<= p && p < 0.5
-             accion = 1;
-        elseif 0.5<= p && p< 0.75
-            accion = 2;
-        elseif 0.75<= p && p <1
-            accion = 3;
+    for d=1: total_des %%1000 decisiones
+        %%Genotipo
+        %%%El genotipo se forma con los valores de las casillas vecinas
+        %N S E O C
+        genotipo = zeros(1,5);
+        %N
+        genotipo(1) = plane(agente_y - 1, agente_x);
+        %plane(agente_y - 1, agente_x) = 33;
+        %S
+        genotipo(2) = plane(agente_y + 1, agente_x);
+        %plane(agente_y+1, agente_x) = 34;
+        %E
+        genotipo(3) = plane(agente_y, agente_x +1);
+        %plane(agente_y, agente_x +1) = 35;
+        %0
+        genotipo(4) = plane(agente_y, agente_x-1);
+        %plane(agente_y, agente_x -1) = 36;
+        %C
+        genotipo(5) = plane(agente_y, agente_x);
+        plane(agente_y, agente_x) = 3; %%valor para ver donde está parado
+        
+        
+        %%Fenotipo
+        % Ternario a decimal
+        dec=0;
+        j=4;
+        for i=1:5
+            dec = dec + (3^(j)) * genotipo(i);
+            j=j-1;
         end
+
+        %Se decide la acción con el código obtenido
+        accion = acciones(k,dec+1);
+        
+        if d<50
+            delay=0;
+        else
+            delay=0;
+        end
+        
+        imagesc(plane); caxis([0 3]);
+        colormap default; 
+        axis off; axis equal; drawnow
+        title(sprintf(['Agente explorador']))
+        text(3,0.9,sprintf(['Agente actual=',num2str(k), ', Iteracion=',num2str(d),', Ambiente=',num2str(v),'\n            Score=',...
+            num2str(punt(k)), ' Sig accion=',num2str(accion)]),'FontSize',13)
+        pause(delay)
+        
+        %%%Mostrar matriz
+        if print_plane == true
+            %%%%IMPRESION
+            fprintf('#############AGENTE %d ##############', k)
+            fprintf('#############ITERACION %d ##############', d)
+            plane
+            %agente_x
+            %agente_y
+            %genotipo
+            %dec
+            accion
+            punt
+        end
+        plane(agente_y, agente_x) = genotipo(5);
+
+
+        
+
+        %%Ejecutar accion
+        %caso aleatorio
+        if accion == 6
+            p = rand();
+            if 0.0 <= p && p < 0.25
+                accion = 0;
+             elseif 0.25<= p && p < 0.5
+                 accion = 1;
+            elseif 0.5<= p && p< 0.75
+                accion = 2;
+            elseif 0.75<= p && p <1
+                accion = 3;
+            end
+        end
+
+        switch accion
+            case 0 %Mover arriba
+                if genotipo(1) ~= 2 %%%Distinto de 2
+                    agente_y = agente_y-1;
+                else%%intenta salir
+                    punt(k) = punt(k) + score_salir;
+                end
+            case 1 %Mover abajo
+                if genotipo(2) ~= 2
+                    agente_y = agente_y+1;
+                else
+                    punt(k) = punt(k) + score_salir;
+                end
+            case 2 %Mover derecha
+                if genotipo(3) ~= 2
+                    agente_x = agente_x +1;
+                 else
+                    punt(k) = punt(k) + score_salir;
+                end
+            case 3 %Mover izquierda
+                if genotipo(4) ~= 2
+                    agente_x = agente_x -1;
+                else
+                    punt(k) = punt(k) + score_salir;
+                end
+            case 4 %Levantar marca
+                if genotipo(5) == 1
+                    punt(k) = punt(k) + score_marcaT;
+                    plane(agente_y, agente_x) = 0;   
+                else
+                    punt(k) = punt(k) + score_marcaF;
+                end
+            case 5
+                %nada
+        end
+        %punt
+        %plane(agente_y, agente_x) = 3     
     end
-    
-    switch accion
-        case 0 %Mover arriba
-            if genotipo(1) ~= 2 %%%Distinto de 2
-                agente_y = agente_y-1;
-            else%%intenta salir
-                punt(k) = punt(k) + score_salir;
-            end
-        case 1 %Mover abajo
-            if genotipo(2) ~= 2
-                agente_y = agente_y+1;
-            else
-                punt(k) = punt(k) + score_salir;
-            end
-        case 2 %Mover derecha
-            if genotipo(3) ~= 2
-                agente_x = agente_x +1;
-             else
-                punt(k) = punt(k) + score_salir;
-            end
-        case 3 %Mover izquierda
-            if genotipo(4) ~= 2
-                agente_x = agente_x -1;
-            else
-                punt(k) = punt(k) + score_salir;
-            end
-        case 4 %Levantar marca
-            if genotipo(5) == 1
-                punt(k) = punt(k) + score_marcaT;
-                plane(agente_y, agente_x) = 0;   
-            else
-                punt(k) = punt(k) + score_marcaF;
-            end
-        case 5
-            %nada
-    end
-    %punt
-    %plane(agente_y, agente_x) = 3     
-end
 end
 end
 %punt;
@@ -164,24 +185,25 @@ end
 %Normalizar cada valor entre 0 y 1
 punt_prom = punt .* (1/total_ambientes);
 
-maxV=max(punt_prom);
-minV=min(punt_prom);
 
-%punt_norm = (punt - minV) .* (1/(maxV-minV));
+if max(punt_prom) >= punt_best
+    punt_best=max(punt_prom);
+    idMax=find(punt_prom==punt_best);
+    accion_best(1,:)=acciones(idMax(1),:);
+end
+
+%%%Normalizar entre 0-1 cada valor
+punt_norm =(punt - minV*10) .* (1/(maxV*10-minV*10));
 punt_normP = (punt_prom -minV) .* (1/(maxV-minV));
 
 %Normalizar rango 0 a 1
-%punt_norm2 = punt_norm .* (1/sum(punt_norm));
+punt_norm2 = punt_norm .* (1/sum(punt_norm));
 punt_norm2P = punt_normP .* (1/sum(punt_normP));
 
-
-
-%punt_norm2Sum = movsum(punt_norm2,[total_agentes 0]); %%%TODO
-
+punt_norm2Sum2 = movsum(punt_norm2,[total_agentes 0]); %%%TODO
 punt_norm2Sum = movsum(punt_norm2P,[total_agentes 0]);  %%%Cambio
 
-
-%%TODO aleatorio comparar con punt_norm2Sum
+%%%Ruleta. Elegir elementos
 for k=1:size(punt,2)
     p = rand();
     %%Seleccionar el intervalo del número aleatorio
@@ -257,15 +279,18 @@ punt_maxP(etapa)= max(punt_prom);
 end
 punt
 
-figure
-plot(punt_max)
-grid on
-title('punt max' )
+% figure
+% plot(punt_max)
+% grid on
+% title('punt max' )
 
 figure
 plot(punt_maxP)
 grid on
-title('punt max P' )
+%title(['Punt Max (', num2str(punt_best),')'])
+title(sprintf(['Punt max (',num2str(punt_best), ')\n(Ambientes=', num2str(total_ambientes),'),  (desiciones= ',...
+    num2str(total_des),'), (Agentes= ', num2str(total_agentes), '), (Score[mT, mF, S] = [',...
+    num2str(scores),']), (Mutation percent= ',num2str(mut_per),'), (Marcas= ', num2str(total_marcas),')']))
 
 
 return;
